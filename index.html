@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elite FinMobiles | Premium Email CRM</title>
+
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<style>
+  :root{
+    --black:#0B0B0B;
+    --black-2:#141414;
+    --black-3:#1c1a16;
+    --gold:#D4AF37;
+    --gold-bright:#FFD700;
+    --gold-dim:#9c7f2a;
+    --text:#F3E9CE;
+    --text-dim:#B9AE94;
+    --glass:rgba(255,255,255,0.04);
+    --glass-border:rgba(212,175,55,0.35);
+    --radius:18px;
+    --serif:'Playfair Display', Georgia, serif;
+    --sans:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html,body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(212,175,55,0.10), transparent 40%),
+      radial-gradient(circle at 85% 90%, rgba(212,175,55,0.08), transparent 45%),
+      var(--black);
+    color:var(--text);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  ::selection{ background:var(--gold); color:#0B0B0B; }
+
+  ::-webkit-scrollbar{ width:10px; }
+  ::-webkit-scrollbar-track{ background:var(--black); }
+  ::-webkit-scrollbar-thumb{ background:linear-gradient(var(--gold-dim),var(--gold)); border-radius:10px; }
+
+  a{ color:inherit; }
+
+  .hidden{ display:none !important; }
+
+  /* ---------- Ambient gold particles ---------- */
+  .ambient{
+    position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0;
+  }
+  .ambient span{
+    position:absolute; width:3px; height:3px; border-radius:50%;
+    background:var(--gold-bright);
+    opacity:0.35;
+    animation:float 14s linear infinite;
+    box-shadow:0 0 8px 2px rgba(255,215,0,0.5);
+  }
+  @keyframes float{
+    0%{ transform:translateY(110vh) translateX(0); opacity:0; }
+    10%{ opacity:0.5; }
+    100%{ transform:translateY(-10vh) translateX(40px); opacity:0; }
+  }
+
+  /* ================= LOGIN ================= */
+  #loginScreen{
+    position:relative; z-index:1;
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px;
+  }
+
+  .login-card{
+    width:100%; max-width:420px;
+    background:linear-gradient(180deg, rgba(28,26,22,0.85), rgba(11,11,11,0.9));
+    border:1px solid var(--glass-border);
+    border-radius:24px;
+    padding:44px 36px 36px;
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    box-shadow:0 25px 70px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,175,55,0.08) inset;
+    text-align:center;
+    animation:riseIn 0.7s cubic-bezier(.2,.8,.2,1);
+  }
+
+  @keyframes riseIn{
+    from{ opacity:0; transform:translateY(24px) scale(0.98); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  .crest{
+    width:74px; height:74px; margin:0 auto 18px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold) 55%, var(--gold-dim) 100%);
+    box-shadow:0 0 0 1px rgba(212,175,55,0.5), 0 0 35px rgba(212,175,55,0.55);
+    font-family:var(--serif); font-weight:800; font-size:26px; color:#0B0B0B;
+  }
+
+  .brand-name{
+    font-family:var(--serif);
+    font-size:26px; font-weight:700;
+    letter-spacing:0.5px;
+    background:linear-gradient(180deg,var(--gold-bright),var(--gold));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .brand-sub{
+    margin-top:4px; font-size:11.5px; letter-spacing:3px; text-transform:uppercase;
+    color:var(--text-dim); font-weight:600;
+  }
+
+  .divider{
+    height:1px; margin:26px 0;
+    background:linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity:0.6;
+  }
+
+  .field-label{
+    display:block; text-align:left; font-size:12px; letter-spacing:1.5px;
+    text-transform:uppercase; color:var(--text-dim); margin-bottom:8px; font-weight:600;
+  }
+
+  .field{
+    width:100%;
+    background:var(--glass);
+    border:1px solid rgba(212,175,55,0.25);
+    color:var(--text);
+    border-radius:12px;
+    padding:14px 16px;
+    font-size:15px;
+    font-family:var(--sans);
+    outline:none;
+    transition:border-color .25s, box-shadow .25s, background .25s;
+  }
+  .field::placeholder{ color:#6b6353; }
+  .field:focus{
+    border-color:var(--gold);
+    background:rgba(212,175,55,0.07);
+    box-shadow:0 0 0 3px rgba(212,175,55,0.15), 0 0 20px rgba(212,175,55,0.15);
+  }
+
+  textarea.field{ resize:vertical; min-height:110px; line-height:1.55; }
+
+  .btn-gold{
+    width:100%;
+    margin-top:22px;
+    background:linear-gradient(135deg, var(--gold-bright), var(--gold) 60%, var(--gold-dim));
+    color:#0B0B0B;
+    border:none;
+    border-radius:12px;
+    padding:15px 18px;
+    font-size:14.5px;
+    font-weight:800;
+    letter-spacing:1.2px;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:transform .2s, box-shadow .2s, filter .2s;
+    box-shadow:0 10px 25px rgba(212,175,55,0.25);
+  }
+  .btn-gold:hover{ transform:translateY(-2px); box-shadow:0 14px 34px rgba(212,175,55,0.4); filter:brightness(1.05); }
+  .btn-gold:active{ transform:translateY(0); }
+
+  .btn-ghost{
+    width:100%;
+    margin-top:12px;
+    background:transparent;
+    color:var(--text-dim);
+    border:1px solid rgba(212,175,55,0.3);
+    border-radius:12px;
+    padding:13px 18px;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:all .2s;
+  }
+  .btn-ghost:hover{ border-color:var(--gold); color:var(--gold-bright); background:rgba(212,175,55,0.06); }
+
+  .error-msg{
+    margin-top:16px;
+    color:#ff6b6b;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:0.3px;
+    display:none;
+    animation:shake .35s;
+  }
+  .error-msg.show{ display:block; }
+  @keyframes shake{
+    0%,100%{ transform:translateX(0); }
+    25%{ transform:translateX(-6px); }
+    75%{ transform:translateX(6px); }
+  }
+
+  /* ================= APP SHELL ================= */
+  #app{ position:relative; z-index:1; min-height:100vh; padding-bottom:60px; }
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 26px;
+    background:linear-gradient(180deg, rgba(20,18,15,0.9), rgba(11,11,11,0.6));
+    border-bottom:1px solid rgba(212,175,55,0.25);
+    position:sticky; top:0; z-index:20;
+    backdrop-filter:blur(14px);
+  }
+  .topbar-left{ display:flex; align-items:center; gap:12px; }
+  .topbar-crest{
+    width:38px; height:38px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold) 60%, var(--gold-dim));
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--serif); font-weight:800; color:#0B0B0B; font-size:15px;
+    box-shadow:0 0 18px rgba(212,175,55,0.5);
+  }
+  .topbar-title{ font-family:var(--serif); font-weight:700; font-size:17px; color:var(--gold-bright); }
+  .topbar-title small{ display:block; font-family:var(--sans); font-size:9.5px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; font-weight:600; margin-top:1px; }
+
+  .btn-logout{
+    background:transparent; border:1px solid rgba(212,175,55,0.4); color:var(--gold-bright);
+    padding:9px 18px; border-radius:10px; font-size:12px; font-weight:700; letter-spacing:1px;
+    text-transform:uppercase; cursor:pointer; transition:all .2s;
+  }
+  .btn-logout:hover{ background:var(--gold); color:#0B0B0B; box-shadow:0 0 20px rgba(212,175,55,0.4); }
+
+  .container{ max-width:1180px; margin:0 auto; padding:28px 20px 0; }
+
+  .section-title{
+    font-family:var(--serif); font-size:20px; font-weight:700; color:var(--gold-bright);
+    margin-bottom:16px; display:flex; align-items:center; gap:10px;
+  }
+  .section-title .num{
+    width:26px; height:26px; border-radius:50%; border:1px solid var(--gold);
+    display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--gold);
+    font-family:var(--sans); font-weight:700;
+  }
+
+  .card{
+    background:linear-gradient(180deg, rgba(28,26,22,0.7), rgba(15,14,12,0.75));
+    border:1px solid var(--glass-border);
+    border-radius:var(--radius);
+    padding:26px;
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    box-shadow:0 18px 40px rgba(0,0,0,0.45);
+    margin-bottom:26px;
+  }
+
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .grid3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; }
+  @media(max-width:760px){ .grid2, .grid3{ grid-template-columns:1fr; } }
+
+  .field-wrap{ margin-bottom:16px; }
+  .field-wrap:last-child{ margin-bottom:0; }
+
+  select.field{
+    appearance:none; -webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23D4AF37'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat:no-repeat; background-position:right 14px center; background-size:18px;
+    padding-right:40px;
+    cursor:pointer;
+  }
+
+  /* Main category chips */
+  .cat-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
+  }
+  @media(max-width:760px){ .cat-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:480px){ .cat-grid{ grid-template-columns:1fr; } }
+
+  .cat-chip{
+    background:var(--glass);
+    border:1px solid rgba(212,175,55,0.22);
+    border-radius:14px;
+    padding:16px 14px;
+    text-align:center;
+    cursor:pointer;
+    transition:all .2s;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--text-dim);
+  }
+  .cat-chip .emoji{ font-size:22px; display:block; margin-bottom:6px; }
+  .cat-chip:hover{ border-color:var(--gold); color:var(--text); transform:translateY(-2px); }
+  .cat-chip.active{
+    border-color:var(--gold-bright);
+    background:linear-gradient(135deg, rgba(212,175,55,0.22), rgba(212,175,55,0.05));
+    color:var(--gold-bright);
+    box-shadow:0 0 22px rgba(212,175,55,0.25);
+  }
+
+  .btn-row{ display:flex; gap:14px; margin-top:22px; flex-wrap:wrap; }
+  .btn-row .btn-gold, .btn-row .btn-ghost{ width:auto; flex:1; min-width:160px; margin-top:0; }
+
+  .status-msg{
+    margin-top:16px; padding:13px 16px; border-radius:10px; font-size:13.5px; font-weight:600;
+    display:none;
+  }
+  .status-msg.show{ display:block; animation:riseIn .3s; }
+  .status-msg.ok{ background:rgba(80,200,120,0.12); border:1px solid rgba(80,200,120,0.4); color:#7CE2A0; }
+  .status-msg.err{ background:rgba(255,80,80,0.1); border:1px solid rgba(255,80,80,0.4); color:#ff8a8a; }
+
+  /* ---------- Email Preview ---------- */
+  .preview-wrap{
+    background:var(--black);
+    border:1px solid rgba(212,175,55,0.3);
+    border-radius:16px;
+    padding:0;
+    overflow:hidden;
+  }
+  .email-shell{
+    background:#0B0B0B;
+    max-width:520px; margin:0 auto;
+    font-family:var(--sans);
+  }
+  .email-header{
+    background:linear-gradient(135deg, #1c1a16, #0B0B0B);
+    padding:28px 24px 22px;
+    text-align:center;
+    border-bottom:1px solid rgba(212,175,55,0.4);
+  }
+  .email-logo{
+    width:56px; height:56px; margin:0 auto 10px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold) 60%, var(--gold-dim));
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--serif); font-weight:800; color:#0B0B0B; font-size:22px;
+  }
+  .email-brand{
+    font-family:var(--serif); font-weight:700; font-size:19px;
+    background:linear-gradient(180deg,var(--gold-bright),var(--gold));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .email-brand-sub{ font-size:9.5px; letter-spacing:2.5px; text-transform:uppercase; color:var(--text-dim); margin-top:3px; font-weight:600; }
+
+  .email-body{ padding:30px 26px; }
+  .email-card{
+    background:linear-gradient(180deg, rgba(212,175,55,0.06), rgba(212,175,55,0.02));
+    border:1px solid rgba(212,175,55,0.35);
+    border-radius:14px;
+    padding:24px;
+  }
+  .email-greeting{ font-size:16px; color:var(--text); margin-bottom:4px; font-weight:600; }
+  .email-category{
+    display:inline-block; margin:10px 0 16px;
+    font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; font-weight:700;
+    color:#0B0B0B; background:var(--gold); padding:5px 12px; border-radius:20px;
+  }
+  .email-divider{ height:1px; background:linear-gradient(90deg, transparent, var(--gold), transparent); margin:16px 0; opacity:0.5; }
+  .email-subject{ font-family:var(--serif); font-size:20px; font-weight:700; color:var(--gold-bright); margin-bottom:14px; }
+  .email-message{ font-size:14.5px; line-height:1.75; color:#E4D9BB; white-space:pre-wrap; }
+
+  .email-footer{
+    text-align:center; padding:26px 24px 30px;
+    border-top:1px solid rgba(212,175,55,0.25);
+  }
+  .email-footer-thanks{ font-family:var(--serif); color:var(--gold-bright); font-size:14px; font-weight:700; margin-bottom:14px; }
+  .email-socials{ display:flex; justify-content:center; gap:16px; margin-bottom:14px; }
+  .email-socials a{
+    width:36px; height:36px; border-radius:50%;
+    border:1px solid rgba(212,175,55,0.4);
+    display:flex; align-items:center; justify-content:center;
+    transition:all .2s;
+  }
+  .email-socials a:hover{ background:var(--gold); box-shadow:0 0 16px rgba(212,175,55,0.5); }
+  .email-socials svg{ width:17px; height:17px; }
+  .email-footer-copy{ font-size:10.5px; color:#6b6353; letter-spacing:0.5px; }
+
+  /* footer of app (bottom) */
+  .app-footer{
+    text-align:center; padding:40px 20px 10px; color:var(--text-dim); font-size:12px;
+  }
+  .app-footer .socials{ display:flex; justify-content:center; gap:18px; margin-bottom:14px; }
+  .app-footer .socials a{
+    width:42px; height:42px; border-radius:50%;
+    border:1px solid rgba(212,175,55,0.35);
+    display:flex; align-items:center; justify-content:center;
+    transition:all .2s;
+  }
+  .app-footer .socials a:hover{ background:var(--gold); box-shadow:0 0 20px rgba(212,175,55,0.5); transform:translateY(-3px); }
+  .app-footer .socials svg{ width:19px; height:19px; }
+
+  .required-star{ color:#ff8a8a; }
+
+  .hint{ font-size:11.5px; color:var(--text-dim); margin-top:6px; }
+
+  @media(max-width:600px){
+    .login-card{ padding:34px 22px 28px; }
+    .container{ padding:20px 14px 0; }
+    .card{ padding:20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ambient" id="ambient"></div>
+
+<!-- ================= LOGIN SCREEN ================= -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="crest">EFM</div>
+    <div class="brand-name">Elite FinMobiles</div>
+    <div class="brand-sub">Premium Email CRM</div>
+    <div class="divider"></div>
+    <form id="loginForm" autocomplete="off">
+      <label class="field-label" for="adminPassword">Admin Password</label>
+      <input class="field" type="password" id="adminPassword" placeholder="Enter admin password" autocomplete="new-password" required>
+      <button type="submit" class="btn-gold">Enter Dashboard</button>
+      <div class="error-msg" id="loginError">Incorrect Admin Password</div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" class="hidden">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-crest">EFM</div>
+      <div class="topbar-title">Elite FinMobiles <small>Premium Email CRM</small></div>
+    </div>
+    <button class="btn-logout" id="logoutBtn">Logout</button>
+  </div>
+
+  <div class="container">
+
+    <!-- CUSTOMER DETAILS -->
+    <div class="section-title"><span class="num">1</span> Customer Details</div>
+    <div class="card">
+      <div class="grid3">
+        <div class="field-wrap">
+          <label class="field-label">Customer Name <span class="required-star">*</span></label>
+          <input class="field" id="custName" type="text" placeholder="e.g. Arjun Mehta">
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Customer Email <span class="required-star">*</span></label>
+          <input class="field" id="custEmail" type="email" placeholder="e.g. arjun@example.com">
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Customer Mobile Number</label>
+          <input class="field" id="custMobile" type="tel" placeholder="e.g. 98765 43210">
+        </div>
+      </div>
+      <div class="field-wrap" style="margin-top:16px; max-width:280px;">
+        <label class="field-label">Customer Type</label>
+        <select class="field" id="custType">
+          <option>Regular</option>
+          <option>Premium</option>
+          <option>VIP</option>
+          <option>Gold</option>
+          <option>Platinum</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- MAIN CATEGORY -->
+    <div class="section-title"><span class="num">2</span> Select Category</div>
+    <div class="card">
+      <div class="cat-grid" id="mainCatGrid"></div>
+    </div>
+
+    <!-- SUBCATEGORY -->
+    <div class="section-title"><span class="num">3</span> Select Message Type</div>
+    <div class="card">
+      <div class="field-wrap" id="subCatWrap">
+        <label class="field-label">Message Type</label>
+        <select class="field" id="subCatSelect"><option value="">Select a category first</option></select>
+        <div class="hint">Choosing a message type will auto-fill a premium template you can edit below.</div>
+      </div>
+    </div>
+
+    <!-- COMPOSER -->
+    <div class="section-title"><span class="num">4</span> Email Composer</div>
+    <div class="card">
+      <div class="field-wrap">
+        <label class="field-label">Email Subject <span class="required-star">*</span></label>
+        <input class="field" id="emailSubject" type="text" placeholder="Enter email subject line">
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Email Heading</label>
+        <input class="field" id="emailHeading" type="text" placeholder="Enter a short heading shown inside the email">
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Message <span class="required-star">*</span></label>
+        <textarea class="field" id="emailMessage" placeholder="Write your message to the customer..."></textarea>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-ghost" id="previewBtn" type="button">Preview Email</button>
+        <button class="btn-gold" id="sendBtn" type="button">Send Email</button>
+      </div>
+      <div class="status-msg" id="statusMsg"></div>
+    </div>
+
+    <!-- LIVE PREVIEW -->
+    <div class="section-title"><span class="num">5</span> Live Preview</div>
+    <div class="card" style="padding:0;">
+      <div class="preview-wrap">
+        <div class="email-shell">
+          <div class="email-header">
+            <div class="email-logo">EFM</div>
+            <div class="email-brand">Elite FinMobiles</div>
+            <div class="email-brand-sub">Premium Mobile Care &amp; Finance</div>
+          </div>
+          <div class="email-body">
+            <div class="email-card">
+              <div class="email-greeting" id="pvGreeting">Hello {{name}}</div>
+              <div class="email-category" id="pvCategory">CATEGORY</div>
+              <div class="email-divider"></div>
+              <div class="email-subject" id="pvSubject">Your email heading will appear here</div>
+              <div class="email-message" id="pvMessage">Your message will appear here as you type.</div>
+            </div>
+          </div>
+          <div class="email-footer">
+            <div class="email-footer-thanks">Thank You For Choosing Elite FinMobiles</div>
+            <div class="email-socials">
+              <a href="https://whatsapp.com/channel/0029VbAr02K11ulGNMzglh3K" target="_blank" rel="noopener" title="WhatsApp">
+                <svg viewBox="0 0 32 32" fill="#25D366"><path d="M16.001 3C9.373 3 4 8.373 4 15c0 2.34.657 4.522 1.797 6.383L4 29l7.828-1.744A11.94 11.94 0 0 0 16.001 27C22.628 27 28 21.627 28 15S22.628 3 16.001 3zm0 21.75c-1.996 0-3.855-.58-5.42-1.578l-.389-.24-4.646 1.035 1.058-4.523-.256-.398A9.71 9.71 0 0 1 6.25 15c0-5.376 4.375-9.75 9.751-9.75S25.75 9.624 25.75 15 21.377 24.75 16.001 24.75zm5.334-7.32c-.293-.147-1.734-.856-2.003-.953-.269-.098-.464-.147-.66.147-.195.293-.756.953-.928 1.148-.171.196-.342.22-.635.073-.293-.147-1.236-.456-2.354-1.454-.87-.776-1.458-1.735-1.629-2.028-.171-.293-.018-.451.129-.598.132-.132.293-.342.44-.513.147-.171.196-.293.293-.489.098-.196.049-.367-.024-.514-.073-.147-.66-1.591-.904-2.18-.238-.573-.481-.495-.66-.504l-.562-.01c-.196 0-.514.073-.783.367-.269.293-1.026 1.002-1.026 2.444 0 1.442 1.05 2.836 1.197 3.032.147.196 2.066 3.155 5.007 4.424.699.302 1.245.483 1.67.618.702.223 1.34.192 1.845.117.563-.084 1.734-.709 1.978-1.393.244-.684.244-1.27.171-1.393-.073-.122-.269-.196-.562-.343z"/></svg>
+              </a>
+              <a href="https://www.facebook.com/share/17qEkQzZUU/" target="_blank" rel="noopener" title="Facebook">
+                <svg viewBox="0 0 24 24" fill="#1877F2"><path d="M22 12.06C22 6.505 17.523 2 12 2S2 6.505 2 12.06c0 5.02 3.657 9.184 8.438 9.94v-7.03H7.898v-2.91h2.54V9.845c0-2.507 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562v1.878h2.773l-.443 2.91h-2.33V22c4.78-.756 8.437-4.92 8.437-9.94z"/></svg>
+              </a>
+              <a href="https://youtube.com/@elitefinmobiles?si=AQ6_ynXyRpcHy_nc" target="_blank" rel="noopener" title="YouTube">
+                <svg viewBox="0 0 24 24" fill="#FF0000"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              </a>
+            </div>
+            <div class="email-footer-copy">Elite FinMobiles &middot; Sales &middot; Repair &middot; Warranty &middot; Finance</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="app-footer">
+    <div class="socials">
+      <a href="https://whatsapp.com/channel/0029VbAr02K11ulGNMzglh3K" target="_blank" rel="noopener" title="WhatsApp">
+        <svg viewBox="0 0 32 32" fill="#D4AF37"><path d="M16.001 3C9.373 3 4 8.373 4 15c0 2.34.657 4.522 1.797 6.383L4 29l7.828-1.744A11.94 11.94 0 0 0 16.001 27C22.628 27 28 21.627 28 15S22.628 3 16.001 3zm0 21.75c-1.996 0-3.855-.58-5.42-1.578l-.389-.24-4.646 1.035 1.058-4.523-.256-.398A9.71 9.71 0 0 1 6.25 15c0-5.376 4.375-9.75 9.751-9.75S25.75 9.624 25.75 15 21.377 24.75 16.001 24.75zm5.334-7.32c-.293-.147-1.734-.856-2.003-.953-.269-.098-.464-.147-.66.147-.195.293-.756.953-.928 1.148-.171.196-.342.22-.635.073-.293-.147-1.236-.456-2.354-1.454-.87-.776-1.458-1.735-1.629-2.028-.171-.293-.018-.451.129-.598.132-.132.293-.342.44-.513.147-.171.196-.293.293-.489.098-.196.049-.367-.024-.514-.073-.147-.66-1.591-.904-2.18-.238-.573-.481-.495-.66-.504l-.562-.01c-.196 0-.514.073-.783.367-.269.293-1.026 1.002-1.026 2.444 0 1.442 1.05 2.836 1.197 3.032.147.196 2.066 3.155 5.007 4.424.699.302 1.245.483 1.67.618.702.223 1.34.192 1.845.117.563-.084 1.734-.709 1.978-1.393.244-.684.244-1.27.171-1.393-.073-.122-.269-.196-.562-.343z"/></svg>
+      </a>
+      <a href="https://www.facebook.com/share/17qEkQzZUU/" target="_blank" rel="noopener" title="Facebook">
+        <svg viewBox="0 0 24 24" fill="#D4AF37"><path d="M22 12.06C22 6.505 17.523 2 12 2S2 6.505 2 12.06c0 5.02 3.657 9.184 8.438 9.94v-7.03H7.898v-2.91h2.54V9.845c0-2.507 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562v1.878h2.773l-.443 2.91h-2.33V22c4.78-.756 8.437-4.92 8.437-9.94z"/></svg>
+      </a>
+      <a href="https://youtube.com/@elitefinmobiles?si=AQ6_ynXyRpcHy_nc" target="_blank" rel="noopener" title="YouTube">
+        <svg viewBox="0 0 24 24" fill="#D4AF37"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+      </a>
+    </div>
+    &copy; <span id="yearNow"></span> Elite FinMobiles. All rights reserved.
+  </div>
+
+</div>
+
+<script>
+/* =========================================================
+   ELITE FINMOBILES PREMIUM EMAIL CRM
+   Single-file vanilla JS + EmailJS
+========================================================= */
+
+/* ---------- CONFIG ---------- */
+const ADMIN_PASSWORD = "md@NASIR@2006";
+const EMAILJS_PUBLIC_KEY = "o7V3hxi5EMhrOCwSG";
+const EMAILJS_SERVICE_ID = "service_1ii7i67";
+const EMAILJS_TEMPLATE_ID = "template_y9e2tyi";
+
+/* Initialize EmailJS */
+(function initEmailJS(){
+  if(window.emailjs){ emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); }
+})();
+
+/* ---------- AMBIENT PARTICLES ---------- */
+(function ambient(){
+  const wrap = document.getElementById('ambient');
+  const count = 22;
+  for(let i=0;i<count;i++){
+    const s = document.createElement('span');
+    s.style.left = Math.random()*100 + 'vw';
+    s.style.animationDelay = (Math.random()*14) + 's';
+    s.style.animationDuration = (10 + Math.random()*10) + 's';
+    wrap.appendChild(s);
+  }
+})();
+
+document.getElementById('yearNow').textContent = new Date().getFullYear();
+
+/* ---------- CATEGORY DATA ---------- */
+const CATEGORIES = {
+  "Mobile Sales": {
+    emoji:"📱",
+    items:["Promotion Offer","New Arrival","Order Received","Order Confirmed","Order Processing","Order Packed","Order Dispatch","Out For Delivery","Order Delivered","Ready For Pickup","Exchange Offer","Upgrade Offer","Festival Offer","Flash Sale","Combo Offer","Accessories","Price Drop","New Launch","Pre Booking","Back In Stock","Out Of Stock","Clearance Sale"]
+  },
+  "Repair Services": {
+    emoji:"🔧",
+    items:["Repair Booking","Device Received","Inspection Started","Diagnosis Completed","Repair In Progress","Quality Check","Repair Completed","Ready For Pickup","Battery Replacement","Charging Pin Replacement","Screen Replacement","Display Replacement","Touch Replacement","Speaker Replacement","Earpiece Replacement","Microphone Replacement","Front Camera Repair","Rear Camera Repair","Camera Replacement","Motherboard Repair","CPU Repair","IC Repair","Power IC Repair","Charging IC Repair","Audio IC Repair","Touch IC Repair","UFS Repair","EMMC Repair","Water Damage Repair","Dead Phone Repair","Software Flash","Software Update","Password Unlock","FRP Unlock","Fingerprint Repair","Face Unlock Repair","Network Repair","Bluetooth Repair","WiFi Repair","SIM Slot Repair","Back Glass Replacement","Frame Replacement","Body Replacement","Volume Button Repair","Power Button Repair","General Service","Repair Warranty Activated","Repair Warranty Expiring"]
+  },
+  "Warranty Services": {
+    emoji:"🛡",
+    items:["Warranty Reminder","Warranty Activated","Warranty Registration","Warranty Expiring","Warranty Claim","Extended Warranty","Warranty Service"]
+  },
+  "Payment Reminder": {
+    emoji:"💳",
+    items:["Payment Due","Payment Pending","Payment Overdue","Gentle Reminder","Final Reminder","Outstanding Balance","Advance Payment","Partial Payment","Booking Amount","One Time Payment","Installment Reminder","Collection Reminder","Service Payment","Product Payment","Receipt Sent","Payment Received","Thank You For Payment","Balance Cleared"]
+  },
+  "EMI Services": {
+    emoji:"📅",
+    items:["EMI Reminder","EMI Due Today","EMI Overdue","EMI Paid","EMI Schedule","EMI Settlement","EMI Extension","EMI Closed"]
+  },
+  "Finance Services": {
+    emoji:"🏦",
+    items:["Personal Loan","Loan Under Process","Loan Approved","Loan Rejected","Loan Disbursed","Top Up Loan","Pre Approved Loan","Credit Card","Credit Card Approved","Credit Card Rejected","Credit Card Delivered","Savings Account","Debit Card","Passbook Ready","KYC Pending","KYC Approved","eKYC Completed","Insurance Offer","Documents Required","Documents Verified","Loan Closed"]
+  },
+  "Customer Relationship": {
+    emoji:"❤️",
+    items:["Welcome","Thank You","Review Request","Feedback Request","VIP Offer","Membership","Cashback","Loyalty Reward","Referral Reward","Birthday Wishes","Anniversary Wishes","Congratulations","Customer Appreciation","Support Ticket","Complaint Update","Customer Satisfaction Survey","Important Notice"]
+  },
+  "Business Notifications": {
+    emoji:"📢",
+    items:["Holiday Notice","Store Timing","New Branch","Temporary Closure","Price Update","Inventory Update","Festival Greeting","Business Announcement","Emergency Notice","Event Invitation","General Information"]
+  },
+  "Other / Custom Message": {
+    emoji:"📝",
+    items:[]
+  }
+};
+
+let currentMainCat = null;
+
+/* ---------- TEMPLATE GENERATOR ---------- */
+/* Builds a premium, context-aware subject/heading/message for any subcategory. */
+function generateTemplate(mainCat, subCat){
+  const name = "{{name}}";
+  let subject = subCat + " – Elite FinMobiles";
+  let heading = subCat;
+  let message = "";
+
+  const lower = subCat.toLowerCase();
+
+  if(lower.includes("reminder") || lower.includes("due") || lower.includes("overdue") || lower.includes("pending")){
+    subject = `${subCat} – Action Required`;
+    message = `Dear ${name},\n\nThis is a courteous reminder from Elite FinMobiles regarding: ${subCat}.\n\nWe kindly request you to review the details at your earliest convenience to avoid any inconvenience. Our team is always available should you need assistance or wish to make arrangements.\n\nWe value your trust in Elite FinMobiles and remain committed to serving you with the highest standard of care.`;
+  } else if(lower.includes("delivered") || lower.includes("completed") || lower.includes("received") || lower.includes("confirmed") || lower.includes("approved") || lower.includes("activated") || lower.includes("cleared") || lower.includes("closed") || lower.includes("disbursed")){
+    subject = `${subCat} – Confirmation`;
+    message = `Dear ${name},\n\nWe are pleased to inform you that your ${subCat.toLowerCase()} has been successfully processed by Elite FinMobiles.\n\nThank you for choosing us. Should you have any questions, our team is delighted to assist you at any time.\n\nWe look forward to continuing to serve you with excellence.`;
+  } else if(lower.includes("offer") || lower.includes("sale") || lower.includes("launch") || lower.includes("arrival") || lower.includes("drop") || lower.includes("cashback") || lower.includes("reward")){
+    subject = `Exclusive: ${subCat} Just For You`;
+    message = `Dear ${name},\n\nAs a valued member of the Elite FinMobiles family, we are delighted to bring you an exclusive update: ${subCat}.\n\nThis offer has been curated especially for our premium customers. Visit us or get in touch with our team to make the most of this opportunity before it ends.\n\nThank you for being a part of the Elite FinMobiles experience.`;
+  } else if(lower.includes("rejected")){
+    subject = `Update Regarding Your ${subCat.replace(" Rejected","")}`;
+    message = `Dear ${name},\n\nWe wish to inform you about an update regarding: ${subCat}.\n\nWe understand this may not be the outcome you expected. Our team is available to discuss the details and explore alternative options that may suit your needs.\n\nThank you for considering Elite FinMobiles.`;
+  } else if(lower.includes("welcome")){
+    subject = `Welcome to Elite FinMobiles, ${name}`;
+    heading = "A Warm Welcome";
+    message = `Dear ${name},\n\nWelcome to Elite FinMobiles. We are honoured to have you with us and look forward to delivering an experience defined by trust, quality and excellence.\n\nOur team is always within reach for anything you may need — from sales and service to finance and support.\n\nThank you for choosing Elite FinMobiles.`;
+  } else if(lower.includes("thank you") || lower.includes("appreciation")){
+    subject = `Thank You, ${name}`;
+    message = `Dear ${name},\n\nOn behalf of the entire Elite FinMobiles team, thank you for your continued trust and support.\n\nIt is customers like you who inspire us to maintain the highest standards of service every single day.\n\nWe look forward to serving you again soon.`;
+  } else if(lower.includes("birthday") || lower.includes("anniversary") || lower.includes("congratulations")){
+    subject = `${subCat} from Elite FinMobiles`;
+    message = `Dear ${name},\n\nOn this special occasion, the entire Elite FinMobiles family extends our warmest wishes to you.\n\nThank you for being a cherished part of our journey. We hope this day brings you joy and celebration.\n\nWarm regards,\nElite FinMobiles`;
+  } else if(lower.includes("notice") || lower.includes("closure") || lower.includes("timing") || lower.includes("announcement") || lower.includes("holiday") || lower.includes("greeting") || lower.includes("branch") || lower.includes("event") || lower.includes("information")){
+    subject = `Notice: ${subCat}`;
+    message = `Dear ${name},\n\nWe would like to inform you of an important update: ${subCat}.\n\nPlease take note of this information. For any queries, our team remains available to assist you.\n\nThank you for your continued association with Elite FinMobiles.`;
+  } else {
+    message = `Dear ${name},\n\nWe are writing to update you regarding: ${subCat}.\n\nOur team at Elite FinMobiles is committed to keeping you informed at every step. Should you need any assistance or have questions, please do not hesitate to reach out.\n\nThank you for choosing Elite FinMobiles — where excellence meets trust.`;
+  }
+
+  return { subject, heading, message };
+}
+
+/* ---------- LOGIN LOGIC ---------- */
+const loginForm = document.getElementById('loginForm');
+const loginError = document.getElementById('loginError');
+const loginScreen = document.getElementById('loginScreen');
+const app = document.getElementById('app');
+
+loginForm.addEventListener('submit', function(e){
+  e.preventDefault();
+  const val = document.getElementById('adminPassword').value;
+  if(val === ADMIN_PASSWORD){
+    loginError.classList.remove('show');
+    loginScreen.classList.add('hidden');
+    app.classList.remove('hidden');
+    sessionStorage.setItem('efm_admin_session', '1');
+  } else {
+    loginError.classList.add('show');
+    document.getElementById('adminPassword').value = '';
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', function(){
+  sessionStorage.removeItem('efm_admin_session');
+  app.classList.add('hidden');
+  loginScreen.classList.remove('hidden');
+  document.getElementById('adminPassword').value = '';
+});
+
+/* Restore session on reload (still requires password each fresh visit if session cleared) */
+window.addEventListener('DOMContentLoaded', function(){
+  if(sessionStorage.getItem('efm_admin_session') === '1'){
+    loginScreen.classList.add('hidden');
+    app.classList.remove('hidden');
+  }
+});
+
+/* ---------- BUILD MAIN CATEGORY GRID ---------- */
+const mainCatGrid = document.getElementById('mainCatGrid');
+Object.keys(CATEGORIES).forEach(function(cat){
+  const chip = document.createElement('div');
+  chip.className = 'cat-chip';
+  chip.dataset.cat = cat;
+  chip.innerHTML = `<span class="emoji">${CATEGORIES[cat].emoji}</span>${cat}`;
+  chip.addEventListener('click', function(){
+    document.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    currentMainCat = cat;
+    populateSubCategories(cat);
+  });
+  mainCatGrid.appendChild(chip);
+});
+
+/* ---------- SUBCATEGORY LOGIC ---------- */
+const subCatSelect = document.getElementById('subCatSelect');
+
+function populateSubCategories(cat){
+  subCatSelect.innerHTML = '';
+  if(cat === "Other / Custom Message"){
+    const opt = document.createElement('option');
+    opt.value = "Custom Message";
+    opt.textContent = "Custom Message (write your own)";
+    subCatSelect.appendChild(opt);
+    clearComposer();
+    updatePreview();
+    return;
+  }
+  const placeholder = document.createElement('option');
+  placeholder.value = "";
+  placeholder.textContent = "Select a message type";
+  subCatSelect.appendChild(placeholder);
+
+  CATEGORIES[cat].items.forEach(function(item){
+    const opt = document.createElement('option');
+    opt.value = item;
+    opt.textContent = item;
+    subCatSelect.appendChild(opt);
+  });
+}
+
+subCatSelect.addEventListener('change', function(){
+  const val = subCatSelect.value;
+  if(!val) return;
+  if(currentMainCat === "Other / Custom Message"){
+    clearComposer();
+    updatePreview();
+    return;
+  }
+  const tpl = generateTemplate(currentMainCat, val);
+  document.getElementById('emailSubject').value = tpl.subject;
+  document.getElementById('emailHeading').value = tpl.heading;
+  document.getElementById('emailMessage').value = tpl.message;
+  updatePreview();
+});
+
+function clearComposer(){
+  document.getElementById('emailSubject').value = '';
+  document.getElementById('emailHeading').value = '';
+  document.getElementById('emailMessage').value = '';
+}
+
+/* initialize with placeholder */
+populateSubCategories(Object.keys(CATEGORIES)[0]);
+document.querySelector('.cat-chip').classList.add('active');
+currentMainCat = Object.keys(CATEGORIES)[0];
+
+/* ---------- LIVE PREVIEW ---------- */
+const pvGreeting = document.getElementById('pvGreeting');
+const pvCategory = document.getElementById('pvCategory');
+const pvSubject = document.getElementById('pvSubject');
+const pvMessage = document.getElementById('pvMessage');
+
+function updatePreview(){
+  const name = document.getElementById('custName').value.trim() || "{{name}}";
+  const heading = document.getElementById('emailHeading').value.trim();
+  const subject = document.getElementById('emailSubject').value.trim();
+  const message = document.getElementById('emailMessage').value.trim();
+  const category = currentMainCat === "Other / Custom Message"
+    ? (subCatSelect.value || "Custom Message")
+    : (subCatSelect.value || currentMainCat || "General");
+
+  pvGreeting.textContent = `Hello ${name}`;
+  pvCategory.textContent = category.toUpperCase();
+  pvSubject.textContent = heading || subject || "Your email heading will appear here";
+  pvMessage.textContent = message || "Your message will appear here as you type.";
+}
+
+['custName','emailSubject','emailHeading','emailMessage'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', updatePreview);
+});
+
+document.getElementById('previewBtn').addEventListener('click', function(){
+  updatePreview();
+  document.querySelector('.preview-wrap').scrollIntoView({ behavior:'smooth', block:'center' });
+});
+
+/* ---------- SEND EMAIL ---------- */
+const statusMsg = document.getElementById('statusMsg');
+
+function showStatus(text, ok){
+  statusMsg.textContent = text;
+  statusMsg.className = 'status-msg show ' + (ok ? 'ok' : 'err');
+}
+
+document.getElementById('sendBtn').addEventListener('click', function(){
+  const name = document.getElementById('custName').value.trim();
+  const email = document.getElementById('custEmail').value.trim();
+  const mobile = document.getElementById('custMobile').value.trim();
+  const custType = document.getElementById('custType').value;
+  const subject = document.getElementById('emailSubject').value.trim();
+  const heading = document.getElementById('emailHeading').value.trim();
+  const message = document.getElementById('emailMessage').value.trim();
+  const category = currentMainCat === "Other / Custom Message"
+    ? "Custom Message"
+    : (subCatSelect.value || currentMainCat || "General");
+
+  if(!name){ showStatus("Please enter the customer name.", false); return; }
+  if(!email){ showStatus("The recipient's address is empty. Please enter a customer email.", false); return; }
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!emailPattern.test(email)){ showStatus("Please enter a valid customer email address.", false); return; }
+  if(!subject){ showStatus("Please enter an email subject.", false); return; }
+  if(!message){ showStatus("Please write a message before sending.", false); return; }
+
+  updatePreview();
+
+  const params = {
+    name: name,
+    email: email,
+    subject: subject,
+    category: category,
+    message: (heading ? heading + "\n\n" : "") + message,
+    phone: mobile,
+    customer_type: custType
+  };
+
+  const sendBtn = document.getElementById('sendBtn');
+  sendBtn.disabled = true;
+  const originalText = sendBtn.textContent;
+  sendBtn.textContent = "Sending...";
+
+  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params).then(
+    function(){
+      showStatus("Email sent successfully to " + email + ".", true);
+      sendBtn.disabled = false;
+      sendBtn.textContent = originalText;
+    },
+    function(err){
+      const errMsg = (err && err.text) ? err.text : "Something went wrong while sending the email.";
+      showStatus("Failed to send email: " + errMsg, false);
+      sendBtn.disabled = false;
+      sendBtn.textContent = originalText;
+    }
+  );
+});
+
+/* initial preview render */
+updatePreview();
+</script>
+</body>
+</html>
