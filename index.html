@@ -787,7 +787,7 @@ function updatePreview(){
     ? (subCatSelect.value || "Custom Message")
     : (subCatSelect.value || currentMainCat || "General");
 
-  pvGreeting.textContent = `Hello ${name}`;
+  pvGreeting.textContent = `Hey ${name}`;
   pvCategory.textContent = category.toUpperCase();
   pvSubject.textContent = heading || subject || "Your email heading will appear here";
   pvMessage.textContent = message || "Your message will appear here as you type.";
